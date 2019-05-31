@@ -1,5 +1,4 @@
-# options(radiant.ace_vim.keys = TRUE)
-options(radiant.ace_vim.keys = FALSE)
+options(radiant.ace_vim.keys = TRUE)
 options(radiant.maxRequestSize = -1)
 # options(radiant.maxRequestSize = 10 * 1024^2)
 options(radiant.report = TRUE)

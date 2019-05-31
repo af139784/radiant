@@ -1,6 +1,6 @@
-FROM vnijs/r-bionic:latest
+FROM af139784/r-xenial:latest
 
-LABEL Vincent Nijs "radiant@rady.ucsd.edu"
+LABEL af139784  
 
 ARG DOCKERHUB_VERSION_UPDATE
 ENV DOCKERHUB_VERSION=${DOCKERHUB_VERSION_UPDATE}
