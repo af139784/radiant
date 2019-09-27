@@ -10,13 +10,6 @@ RUN git clone https://github.com/radiant-rstats/radiant.git /srv/shiny-server/ra
   && chown shiny:shiny -R /srv/shiny-server \
   && R -e 'source("https://raw.githubusercontent.com/radiant-rstats/minicran/gh-pages/rsm-msba.R")'
 
-# update radiant to development version
-RUN R -e 'remotes::install_github("radiant-rstats/radiant.data", upgrade = "never")' \
-  -e 'remotes::install_github("radiant-rstats/radiant.basics", upgrade = "never")' \
-  -e 'remotes::install_github("radiant-rstats/radiant.design", upgrade = "never")' \
-  -e 'remotes::install_github("radiant-rstats/radiant.model", upgrade = "never")' \
-  -e 'remotes::install_github("radiant-rstats/radiant.multivariate", upgrade = "never")'
-
 # install lightGBM
 RUN git clone --recursive https://github.com/Microsoft/LightGBM \
   && cd LightGBM \
@@ -28,15 +21,30 @@ RUN git clone --recursive https://github.com/Microsoft/LightGBM \
 ARG PYBASE=/home/${NB_USER}/.rsm-msba
 ENV PYBASE=${PYBASE}
 RUN echo "PYTHONUSERBASE=${PYBASE}" >> /etc/R/Renviron.site \
-  && echo "WORKON_HOME=${PYBASE}" >> /etc/R/Renviron.site
+  && echo "WORKON_HOME=${PYBASE}" >> /etc/R/Renviron.site \
+  && echo "NB_USER=${NB_USER}" >> /etc/R/Renviron.site
 
 ## update R-packages
 RUN R -e 'radiant.update::radiant.update()'
+
+# update radiant to development version
+RUN R -e 'remotes::install_github("trestletech/shinyAce", upgrade = "never")'
+RUN R -e 'remotes::install_github("radiant-rstats/radiant.data", upgrade = "never")' \
+  -e 'remotes::install_github("radiant-rstats/radiant.basics", upgrade = "never")' \
+  -e 'remotes::install_github("radiant-rstats/radiant.design", upgrade = "never")' \
+  -e 'remotes::install_github("radiant-rstats/radiant.model", upgrade = "never")' \
+  -e 'remotes::install_github("radiant-rstats/radiant.multivariate", upgrade = "never")'
+
+RUN R -e 'remotes::install_github("tidyverse/dtplyr", upgrade = "never")'
 
 COPY shiny-server.conf /etc/shiny-server/shiny-server.conf
 RUN sed -i -e "s/\:HOME_USER\:/${NB_USER}/" /etc/shiny-server/shiny-server.conf
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Copy the launch script into the image
+ADD https://raw.githubusercontent.com/radiant-rstats/docker/master/launch-radiant.sh /opt/launch.sh
+RUN chmod 777 /opt/launch.sh
 
 EXPOSE 8080 8787
 
